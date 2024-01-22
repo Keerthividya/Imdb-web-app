@@ -1,38 +1,40 @@
-# Stage 1: Build the .NET backend
+# Use the official .NET SDK image as the base image
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 
+# Set the working directory for backend
 WORKDIR /app/Backend
-COPY Backend/. .
 
-RUN dotnet publish -c Release -o publish
+# Copy the published backend files to the working directory
+COPY Backend/publish/ .
 
-# Stage 2: Build the Vue.js frontend
+# Use Node.js image as the base image for frontend build
 FROM node:14 AS frontend-build
 
-WORKDIR /app/Frontend
+# Set the working directory for frontend
+WORKDIR /app/Frontend/dist
 
-COPY Frontend/package*.json ./
-RUN npm install
-
-COPY Frontend/ .
+# Copy the frontend project files to the working directory
+COPY Frontend/dist/ .
 
 # Run npm install and npm run build for the Vue.js frontend
 RUN npm install
+
 RUN npm run build
 
-# Stage 3: Build the final image
+# Use a lighter runtime image for the final image
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime
 
+# Set the working directory
 WORKDIR /app
 
-# Copy the published .NET backend
-COPY --from=build /app/Backend/publish .
+# Copy the published backend files from the build image
+COPY --from=build /app/Backend .
 
-# Copy the built Vue.js frontend to the web server directory
+# Copy the built frontend files to the web server directory
 COPY --from=frontend-build /app/Frontend/dist /app/wwwroot
 
 # Expose port 80
 EXPOSE 80
 
-# Specify the command to run the .NET backend application
-CMD ["dotnet", "IMDB.dll"]
+# Specify the command to run the backend application
+CMD ["dotnet", "IMDB.dll"]  
