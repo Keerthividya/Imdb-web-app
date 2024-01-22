@@ -5,6 +5,6 @@ A dynamic Single Page Application designed for effortless movie exploration and 
 
 Tech Stack:
 
-Backend : C#, Microsoft SQL Server, .NET Core
+Backend : C#, .NET Core, Microsoft SQL Server
 
 Frontend: Vue.js, REST APIs
